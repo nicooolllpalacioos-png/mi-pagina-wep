@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLINK – Identificación Médica Inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --navy: #0d1b3e;
+    --navy-light: #1a2f5e;
+    --blue: #2563a8;
+    --blue-mid: #3b82c4;
+    --blue-light: #e8f1fb;
+    --cream: #f8f4ed;
+    --cream-dark: #ede8df;
+    --bordo: #7b1f3a;
+    --bordo-light: #a83256;
+    --white: #ffffff;
+    --black: #0a0a0a;
+    --gray: #6b7280;
+    --gray-light: #f3f4f6;
+    --success: #7b1f3a;
+    --error: #dc2626;
+    --shadow: 0 4px 32px rgba(13,27,62,0.13);
+    --shadow-sm: 0 2px 12px rgba(13,27,62,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--black); min-height: 100vh; }
+
+  /* NAV */
+  nav { background: var(--navy); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 68px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 24px rgba(13,27,62,0.35); }
+  .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .logo-icon { width: 36px; height: 36px; background: var(--bordo); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 20px; height: 20px; fill: white; }
+  .logo-text { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--white); letter-spacing: 2px; }
+  .logo-sub { font-size: 0.62rem; color: #a0b4d6; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-top: -4px; }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-btn { background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: white; padding: 8px 20px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+  .nav-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+  .nav-btn.primary { background: var(--bordo); border-color: var(--bordo); }
+  .nav-btn.primary:hover { background: var(--bordo-light); }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 50%, #1d3a7a 100%); min-height: calc(100vh - 68px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4rem 2rem; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 80%, rgba(123,31,58,0.25) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(37,99,168,0.3) 0%, transparent 60%); pointer-events: none; }
+  .hero-pulse { width: 120px; height: 120px; background: rgba(123,31,58,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2.5rem; position: relative; animation: pulse-ring 2.5s ease-out infinite; }
+  .hero-pulse::before { content: ''; position: absolute; inset: -12px; border: 2px solid rgba(123,31,58,0.3); border-radius: 50%; animation: pulse-ring 2.5s ease-out infinite 0.4s; }
+  .hero-pulse svg { width: 60px; height: 60px; fill: #e87a9a; filter: drop-shadow(0 0 20px rgba(232,122,154,0.5)); }
+  @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 1; } 100% { transform: scale(1.05); opacity: 0.7; } }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; color: var(--white); letter-spacing: 4px; margin-bottom: 1rem; }
+  .hero-tagline { font-size: 1rem; color: #a0b4d6; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2rem; font-weight: 300; }
+  .hero-phrase { font-size: clamp(1rem, 2vw, 1.25rem); color: rgba(255,255,255,0.85); max-width: 600px; line-height: 1.7; margin-bottom: 3rem; }
+  .hero-phrase strong { color: var(--white); font-weight: 600; }
+  .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; border: none; transition: all 0.25s; text-decoration: none; }
+  .btn-primary { background: var(--bordo); color: white; box-shadow: 0 4px 20px rgba(123,31,58,0.4); }
+  .btn-primary:hover { background: var(--bordo-light); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(123,31,58,0.5); }
+  .btn-outline { background: transparent; color: white; border: 1.5px solid rgba(255,255,255,0.35); }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: white; }
+  .hero-stats { display: flex; gap: 3rem; margin-top: 4rem; padding-top: 3rem; border-top: 1px solid rgba(255,255,255,0.1); }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: white; display: block; }
+  .stat-label { font-size: 0.75rem; color: #a0b4d6; text-transform: uppercase; letter-spacing: 1.5px; }
+  .scroll-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.4); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(6px); } }
+
+  /* MAIN CONTAINER */
+  .container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem; }
+  .section-sub { color: var(--gray); font-size: 0.9rem; margin-bottom: 2.5rem; }
+
+  /* FORM CARD */
+  .form-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 2.5rem; margin-bottom: 2rem; border-top: 4px solid var(--navy); }
+  .form-card-title { font-size: 1rem; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid var(--cream-dark); }
+  .form-card-title svg { width: 20px; height: 20px; fill: var(--bordo); flex-shrink: 0; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+  .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.8rem; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: 0.8px; }
+  .field label .req { color: var(--bordo); margin-left: 2px; }
+  .field input, .field select, .field textarea { padding: 11px 14px; border: 1.5px solid #dde3ef; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--black); background: var(--cream); transition: border-color 0.2s, box-shadow 0.2s; outline: none; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,168,0.1); background: white; }
+  .field input.error, .field select.error, .field textarea.error { border-color: var(--error); }
+  .field .hint { font-size: 0.75rem; color: var(--gray); }
+  .field textarea { resize: vertical; min-height: 90px; }
+  .error-msg { font-size: 0.75rem; color: var(--error); display: none; margin-top: 2px; }
+  .error-msg.show { display: block; }
+
+  /* RADIO/CHECK GROUP */
+  .radio-group { display: flex; flex-wrap: wrap; gap: 10px; }
+  .radio-opt { display: flex; align-items: center; gap: 8px; padding: 9px 16px; border: 1.5px solid #dde3ef; border-radius: 50px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; background: var(--cream); user-select: none; }
+  .radio-opt:hover { border-color: var(--blue); background: var(--blue-light); }
+  .radio-opt input { display: none; }
+  .radio-opt.selected { border-color: var(--navy); background: var(--navy); color: white; }
+  .check-opt { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1.5px solid #dde3ef; border-radius: var(--radius-xs); cursor: pointer; font-size: 0.85rem; transition: all 0.2s; background: var(--cream); user-select: none; }
+  .check-opt:hover { border-color: var(--blue); }
+  .check-opt.selected { border-color: var(--blue); background: var(--blue-light); color: var(--navy); font-weight: 500; }
+  .check-opt input { display: none; }
+  .checks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+
+  /* COLLAPSIBLE */
+  .collapse-trigger { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 12px 16px; background: var(--cream); border-radius: var(--radius-sm); border: 1.5px solid transparent; transition: all 0.2s; }
+  .collapse-trigger:hover { border-color: var(--blue-mid); background: var(--blue-light); }
+  .collapse-trigger .arrow { transition: transform 0.3s; font-size: 1.2rem; color: var(--blue); }
+  .collapse-trigger.open .arrow { transform: rotate(180deg); }
+  .collapse-body { display: none; padding-top: 1.25rem; }
+  .collapse-body.open { display: block; }
+
+  /* MED TABLE */
+  .med-row { background: var(--cream); border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid #e8eaf0; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .med-row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .med-row-footer { display: flex; justify-content: flex-end; }
+  .add-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; background: var(--navy); color: white; border: none; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; cursor: pointer; font-weight: 500; transition: all 0.2s; margin-top: 10px; }
+  .add-btn:hover { background: var(--blue); }
+  .remove-btn { background: none; border: none; cursor: pointer; color: var(--bordo); font-size: 1.2rem; padding: 4px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+  .remove-btn:hover { transform: scale(1.2); }
+
+  /* STEP INDICATOR */
+  .steps { display: flex; align-items: center; gap: 0; margin-bottom: 3rem; background: white; border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); overflow-x: auto; }
+  .step { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--cream-dark); color: var(--gray); display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 600; transition: all 0.3s; flex-shrink: 0; }
+  .step.active .step-num { background: var(--navy); color: white; }
+  .step.done .step-num { background: var(--success); color: white; }
+  .step-label { font-size: 0.78rem; color: var(--gray); white-space: nowrap; }
+  .step.active .step-label { color: var(--navy); font-weight: 600; }
+  .step-line { flex: 1; height: 2px; background: var(--cream-dark); min-width: 20px; }
+  .step.done ~ .step .step-line { background: var(--success); }
+
+  /* PROGRESS BAR */
+  .progress-bar { height: 4px; background: #e8eaf0; border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--navy), var(--bordo)); border-radius: 2px; transition: width 0.5s ease; }
+
+  /* TERMS */
+  .terms-box { background: var(--navy); color: rgba(255,255,255,0.85); border-radius: var(--radius); padding: 2rem; margin-bottom: 2rem; }
+  .terms-box h3 { color: white; font-family: 'Playfair Display', serif; margin-bottom: 1rem; }
+  .terms-box ul { list-style: none; padding: 0; }
+  .terms-box ul li { padding: 6px 0; font-size: 0.87rem; display: flex; gap: 10px; }
+  .terms-box ul li::before { content: '♥'; color: var(--bordo-light); flex-shrink: 0; }
+  .heart-accept { display: flex; align-items: center; gap: 16px; padding: 20px; background: white; border-radius: var(--radius); border: 2px dashed #dde3ef; cursor: pointer; transition: all 0.3s; margin-bottom: 2rem; }
+  .heart-accept:hover { border-color: var(--bordo); background: #fff5f7; }
+  .heart-btn { width: 52px; height: 52px; background: none; border: none; cursor: pointer; font-size: 2rem; transition: transform 0.2s; line-height: 1; }
+  .heart-btn.accepted { animation: heartbeat 0.4s ease; filter: none; }
+  @keyframes heartbeat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+  .heart-accept-text strong { display: block; font-weight: 600; color: var(--navy); }
+  .heart-accept-text span { font-size: 0.82rem; color: var(--gray); }
+
+  /* SUBMIT */
+  .submit-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, var(--navy), var(--bordo)); color: white; border: none; border-radius: var(--radius); font-family: 'Playfair Display', serif; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 24px rgba(13,27,62,0.3); letter-spacing: 1px; }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(13,27,62,0.4); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .nav-btns-form { display: flex; gap: 12px; margin-top: 1.5rem; }
+  .back-btn { flex: 1; padding: 14px; background: white; color: var(--navy); border: 1.5px solid #dde3ef; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
+  .back-btn:hover { border-color: var(--navy); }
+  .next-btn { flex: 2; padding: 14px; background: var(--navy); color: white; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .next-btn:hover { background: var(--blue); }
+
+  /* PATIENT LIST */
+  .search-bar { display: flex; gap: 12px; margin-bottom: 2rem; }
+  .search-bar input { flex: 1; padding: 12px 18px; border: 1.5px solid #dde3ef; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; outline: none; background: white; }
+  .search-bar input:focus { border-color: var(--blue); }
+  .patient-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+  .patient-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 1.5rem; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; position: relative; }
+  .patient-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--blue-mid); }
+  .patient-card-id { font-size: 0.72rem; color: var(--bordo); font-weight: 600; letter-spacing: 1px; margin-bottom: 8px; }
+  .patient-card-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .patient-card-info { font-size: 0.82rem; color: var(--gray); margin-bottom: 12px; }
+  .blood-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; background: #fff0f3; border-radius: 50px; color: var(--bordo); font-size: 0.78rem; font-weight: 600; border: 1px solid #ffd6de; }
+  .empty-state { text-align: center; padding: 5rem 2rem; color: var(--gray); }
+  .empty-state svg { width: 80px; height: 80px; fill: #dde3ef; margin: 0 auto 1.5rem; display: block; }
+  .empty-state p { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--navy); }
+
+  /* QR PROFILE */
+  .profile-header { background: linear-gradient(135deg, var(--navy), #1d3a7a); border-radius: var(--radius); padding: 2.5rem; color: white; margin-bottom: 2rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+  .profile-name { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .profile-id { font-size: 0.8rem; color: #a0b4d6; letter-spacing: 2px; }
+  .profile-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1rem; }
+  .badge { padding: 5px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }
+  .badge-blood { background: var(--bordo); color: white; }
+  .badge-age { background: rgba(255,255,255,0.15); color: white; }
+  .badge-donor { background: var(--success); color: white; }
+
+  /* EMERGENCY CARD */
+  .emergency-card { background: var(--bordo); color: white; border-radius: var(--radius); padding: 2rem; margin-bottom: 2rem; }
+  .emergency-title { font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+  .emergency-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.2); }
+  .emergency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .em-item label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); display: block; margin-bottom: 4px; }
+  .em-item span { font-size: 1rem; font-weight: 500; }
+  .em-item span.big { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; }
+
+  /* QR BOX */
+  .qr-section { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; text-align: center; margin-bottom: 2rem; }
+  .qr-section h3 { font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 0.4rem; }
+  .qr-section p { font-size: 0.85rem; color: var(--gray); margin-bottom: 1.5rem; }
+  #qr-container { display: flex; justify-content: center; align-items: center; margin: 0 auto 1.5rem; }
+  #qr-container canvas, #qr-container img { border-radius: 8px; }
+  .qr-print-btn { padding: 10px 24px; background: var(--navy); color: white; border: none; border-radius: 50px; font-family: 'DM Sans', sans-serif; cursor: pointer; font-size: 0.85rem; margin-right: 8px; transition: all 0.2s; }
+  .qr-print-btn:hover { background: var(--blue); }
+
+  /* INFO SECTIONS */
+  .info-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .info-card-title { font-size: 0.78rem; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .info-card-title svg { width: 16px; height: 16px; fill: var(--bordo); }
+  .info-row { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--cream-dark); font-size: 0.88rem; }
+  .info-row:last-child { border-bottom: none; }
+  .info-row label { color: var(--gray); min-width: 180px; flex-shrink: 0; font-size: 0.82rem; }
+  .info-row span { color: var(--black); font-weight: 500; }
+  .tag { display: inline-flex; padding: 3px 10px; background: var(--blue-light); color: var(--navy); border-radius: 50px; font-size: 0.78rem; font-weight: 500; margin: 2px; }
+  .tag.danger { background: #fff0f3; color: var(--bordo); }
+  .tag.warning { background: #fff8e6; color: #92400e; }
+
+  /* QR SCANNER */
+  .scanner-area { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 2rem; text-align: center; }
+  #scanner-video { width: 100%; max-width: 480px; border-radius: var(--radius-sm); background: black; display: none; margin: 0 auto 1rem; }
+  .scan-btn { padding: 14px 32px; background: var(--navy); color: white; border: none; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; cursor: pointer; margin: 0.5rem; transition: all 0.2s; }
+  .scan-btn:hover { background: var(--blue); }
+  .scan-btn.stop { background: var(--bordo); }
+  .scan-manual { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--cream-dark); }
+  .scan-manual input { padding: 12px 18px; border: 1.5px solid #dde3ef; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; width: 280px; outline: none; margin-right: 10px; }
+  .scan-manual input:focus { border-color: var(--blue); }
+  .scan-result-msg { padding: 12px 20px; border-radius: var(--radius-sm); margin-top: 1rem; font-size: 0.9rem; display: none; }
+  .scan-result-msg.error { background: #fff0f0; color: var(--error); display: block; }
+  .scan-result-msg.success { background: #fff0f3; color: var(--bordo); display: block; }
+
+  /* BACK LINK */
+  .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--gray); font-size: 0.85rem; cursor: pointer; margin-bottom: 2rem; text-decoration: none; transition: color 0.2s; }
+  .back-link:hover { color: var(--navy); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--navy); color: white; padding: 14px 24px; border-radius: var(--radius-sm); box-shadow: var(--shadow); font-size: 0.88rem; z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s; display: flex; align-items: center; gap: 10px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--error); }
+
+  /* PRINT */
+  @media print {
+    nav, .back-link, .qr-print-btn, .emergency-card, #page-home, #page-list, #page-form, #page-scan { display: none !important; }
+    .profile-header, .qr-section { box-shadow: none; }
+    .qr-section { page-break-inside: avoid; }
+  }
+
+  @media (max-width: 640px) {
+    .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+    .col-span-2, .col-span-3 { grid-column: span 1; }
+    .emergency-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 1.5rem; }
+    .profile-header { flex-direction: column; }
+  }
+
+  /* CONFIRM MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(13,27,62,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal-box { background: white; border-radius: var(--radius); box-shadow: 0 8px 48px rgba(13,27,62,0.3); padding: 2rem; max-width: 400px; width: 100%; border-top: 4px solid var(--bordo); transform: translateY(-12px); transition: transform 0.2s; }
+  .modal-overlay.show .modal-box { transform: translateY(0); }
+  .modal-box h3 { font-family: 'Playfair Display', serif; color: var(--navy); margin-bottom: 0.5rem; font-size: 1.2rem; }
+  .modal-box p { color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .modal-btns { display: flex; gap: 10px; }
+  .modal-cancel { flex: 1; padding: 11px; background: white; color: var(--navy); border: 1.5px solid #dde3ef; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+  .modal-cancel:hover { border-color: var(--navy); }
+  .modal-confirm { flex: 1; padding: 11px; background: var(--bordo); color: white; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .modal-confirm:hover { background: var(--bordo-light); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#" onclick="showPage('home')">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </div>
+    <div>
+      <span class="logo-text">BLINK</span>
+      <span class="logo-sub">Identificación Médica</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <button class="nav-btn" onclick="showPage('scan')">Escanear QR</button>
+    <button class="nav-btn" onclick="showPage('list')">Mis Pacientes</button>
+    <button class="nav-btn primary" onclick="showPage('form')">+ Registrar</button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal-box">
+    <h3>¿Eliminar perfil?</h3>
+    <p>Esta acción no se puede deshacer. El perfil y todos sus datos serán eliminados permanentemente.</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeConfirmModal()">Cancelar</button>
+      <button class="modal-confirm" onclick="confirmDelete()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-pulse">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </div>
+    <h1>BLINK</h1>
+    <p class="hero-tagline">Sistema Inteligente de Identificación Médica</p>
+    <p class="hero-phrase"><strong>Tu información puede salvar tiempo.</strong><br>Tu tiempo puede salvar tu vida.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="showPage('form')">
+        <svg style="width:18px;height:18px;fill:white;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        Registrar Paciente
+      </button>
+      <button class="btn btn-outline" onclick="showPage('scan')">
+        <svg style="width:18px;height:18px;fill:white;" viewBox="0 0 24 24"><path d="M9.5 6.5v3h-3v-3h3M11 5H5v6h6V5zm-1.5 9.5v3h-3v-3h3M11 13H5v6h6v-6zm6.5-6.5v3h-3v-3h3M20 5h-6v6h6V5zm-6 8h1.5v1.5H14V13zm1.5 1.5H17V16h-1.5v-1.5zM17 13h1.5v1.5H17V13zm-3 3h1.5v1.5H14V16zm1.5 1.5H17V19h-1.5v-1.5zM17 16h1.5v1.5H17V16zm1.5-1.5H20V16h-1.5v-1.5zm0 3H20V19h-1.5v-1.5zM22 7h-2V4h-3V2h5v5zm0 15v-5h-2v3h-3v2h5zM2 22h5v-2H4v-3H2v5zM2 2v5h2V4h3V2H2z"/></svg>
+        Escanear QR
+      </button>
+      <button class="btn btn-outline" onclick="showPage('list')">
+        Ver Pacientes
+      </button>
+    </div>
+    <div class="hero-stats" id="hero-stats">
+      <div class="stat"><span class="stat-num" id="stat-patients">0</span><span class="stat-label">Pacientes</span></div>
+      <div class="stat"><span class="stat-num" id="stat-secure">100%</span><span class="stat-label">Seguro</span></div>
+      <div class="stat"><span class="stat-num">QR</span><span class="stat-label">Único</span></div>
+    </div>
+    <div class="scroll-hint">▼ &nbsp; Registrá tu información</div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="page" id="page-form">
+<div class="container">
+  <a class="back-link" onclick="showPage('home')">← Volver al inicio</a>
+  <div class="section-title">Registro de Paciente</div>
+  <p class="section-sub">Completá los datos para generar tu perfil médico y código QR único.</p>
+
+  <!-- Progress -->
+  <div class="progress-bar"><div class="progress-fill" id="form-progress" style="width:14%"></div></div>
+
+  <!-- Steps -->
+  <div class="steps" id="form-steps">
+    <div class="step active" data-step="1"><div class="step-num">1</div><span class="step-label">Personal</span></div>
+    <div class="step-line"></div>
+    <div class="step" data-step="2"><div class="step-num">2</div><span class="step-label">Médico</span></div>
+    <div class="step-line"></div>
+    <div class="step" data-step="3"><div class="step-num">3</div><span class="step-label">Alergias</span></div>
+    <div class="step-line"></div>
+    <div class="step" data-step="4"><div class="step-num">4</div><span class="step-label">Medicación</span></div>
+    <div class="step-line"></div>
+    <div class="step" data-step="5"><div class="step-num">5</div><span class="step-label">Emergencia</span></div>
+    <div class="step-line"></div>
+    <div class="step" data-step="6"><div class="step-num">6</div><span class="step-label">Confirmar</span></div>
+  </div>
+
+  <!-- STEP 1: Personal -->
+  <div class="form-step" id="step-1">
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        Información Personal
+      </div>
+      <div class="form-grid">
+        <div class="field col-span-2">
+          <label>Nombre y Apellido <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="Ej: Juan García">
+          <span class="error-msg" id="err-name">Por favor ingresá tu nombre completo.</span>
+        </div>
+        <div class="field">
+          <label>Sexo <span class="req">*</span></label>
+          <div class="radio-group" id="f-sex">
+            <label class="radio-opt"><input type="radio" name="sex" value="Masculino"> Masculino</label>
+            <label class="radio-opt"><input type="radio" name="sex" value="Femenino"> Femenino</label>
+          </div>
+          <span class="error-msg" id="err-sex">Seleccioná una opción.</span>
+        </div>
+        <div class="field">
+          <label>Número de Documento <span class="req">*</span></label>
+          <input type="text" id="f-doc" placeholder="Ej: 35123456">
+          <span class="error-msg" id="err-doc">Ingresá un número de documento válido.</span>
+        </div>
+        <div class="field col-span-2">
+          <label>Ciudad de Residencia <span class="req">*</span></label>
+          <input type="text" id="f-city" placeholder="Ej: Buenos Aires">
+          <span class="error-msg" id="err-city">Ingresá tu ciudad.</span>
+        </div>
+        <div class="field">
+          <label>Teléfono Personal</label>
+          <input type="tel" id="f-phone" placeholder="Ej: +54 9 11 1234-5678">
+        </div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>
+        Fecha de Nacimiento
+      </div>
+      <div class="form-grid-3">
+        <div class="field">
+          <label>Día <span class="req">*</span></label>
+          <select id="f-day">
+            <option value="">Día</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Mes <span class="req">*</span></label>
+          <select id="f-month">
+            <option value="">Mes</option>
+            <option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option>
+            <option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option>
+            <option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option>
+            <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Año <span class="req">*</span></label>
+          <select id="f-year">
+            <option value="">Año</option>
+          </select>
+        </div>
+        <div class="field col-span-3">
+          <label>Edad (calculada automáticamente)</label>
+          <input type="text" id="f-age" readonly placeholder="Se calcula sola" style="background:#f0f0f0;cursor:default;">
+          <span class="error-msg" id="err-birth">Seleccioná una fecha de nacimiento válida.</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns-form">
+      <button class="next-btn" onclick="nextStep(1)">Continuar → Información Médica</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Médico -->
+  <div class="form-step" id="step-2" style="display:none">
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        Información Física
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Altura (cm)</label>
+          <input type="number" id="f-height" placeholder="Ej: 170" min="50" max="250">
+          <span class="hint">Rango normal: 140–210 cm</span>
+        </div>
+        <div class="field">
+          <label>Peso (kg)</label>
+          <input type="number" id="f-weight" placeholder="Ej: 70" min="1" max="300">
+          <span class="hint">Rango normal: 40–200 kg</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Tipo de Sangre <span style="color:var(--bordo);margin-left:4px">*</span>
+      </div>
+      <div class="radio-group" id="f-blood" style="flex-wrap:wrap">
+        <label class="radio-opt" style="font-weight:600;color:var(--bordo)"><input type="radio" name="blood" value="A+"> A+</label>
+        <label class="radio-opt" style="font-weight:600;color:var(--bordo)"><input type="radio" name="blood" value="A-"> A−</label>
+        <label class="radio-opt" style="font-weight:600;color:var(--bordo)"><input type="radio" name="blood" value="B+"> B+</label>
+        <label class="radio-opt" style="font-weight:600;color:var(--bordo)"><input type="radio" name="blood" value="B-"> B−</label>
+        <label class="radio-opt" style="font-weight:600;color:var(--bordo)"><input type="radio" name="blood" value="AB+"> AB+</label>
+        <label class="radio-opt" style="font-weight:600;color:var(--bordo)"><input type="radio" name="blood" value="AB-"> AB−</label>
+        <label class="radio-opt" style="font-weight:600;color:var(--bordo)"><input type="radio" name="blood" value="O+"> O+</label>
+        <label class="radio-opt" style="font-weight:600;color:var(--bordo)"><input type="radio" name="blood" value="O-"> O−</label>
+        <label class="radio-opt"><input type="radio" name="blood" value="otro"> Otro</label>
+      </div>
+      <div id="blood-other" style="display:none;margin-top:12px">
+        <input type="text" id="f-blood-other" placeholder="Especificá tu tipo de sangre" style="padding:10px 14px;border:1.5px solid #dde3ef;border-radius:8px;font-family:'DM Sans',sans-serif;width:100%;outline:none;">
+      </div>
+      <span class="error-msg" id="err-blood">Seleccioná tu tipo de sangre.</span>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        Antecedentes Médicos
+      </div>
+      <div class="radio-group" id="f-history-has" style="margin-bottom:1rem">
+        <label class="radio-opt"><input type="radio" name="history-has" value="no" checked> Ninguno</label>
+        <label class="radio-opt"><input type="radio" name="history-has" value="si"> Sí tengo</label>
+      </div>
+      <div id="history-fields" style="display:none">
+        <div class="checks-grid">
+          <label class="check-opt"><input type="checkbox" value="Diabetes"> Diabetes</label>
+          <label class="check-opt"><input type="checkbox" value="Epilepsia"> Epilepsia</label>
+          <label class="check-opt"><input type="checkbox" value="Asma"> Asma</label>
+          <label class="check-opt"><input type="checkbox" value="Hipertensión"> Hipertensión</label>
+          <label class="check-opt"><input type="checkbox" value="Problemas cardíacos"> Problemas cardíacos</label>
+          <label class="check-opt"><input type="checkbox" value="Trastornos de coagulación"> Coagulación</label>
+          <label class="check-opt"><input type="checkbox" value="Enfermedades respiratorias"> Respiratorias</label>
+          <label class="check-opt"><input type="checkbox" value="Enfermedades renales"> Renales</label>
+          <label class="check-opt"><input type="checkbox" value="Enfermedades neurológicas"> Neurológicas</label>
+          <label class="check-opt"><input type="checkbox" value="Otras"> Otras</label>
+        </div>
+        <div class="field" style="margin-top:1rem">
+          <label>Observaciones</label>
+          <textarea id="f-history-obs" placeholder="Detallá los antecedentes médicos relevantes..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        Discapacidades
+      </div>
+      <div class="radio-group" id="f-disability">
+        <label class="radio-opt"><input type="radio" name="disability" value="Ninguna" checked> Ninguna</label>
+        <label class="radio-opt"><input type="radio" name="disability" value="Motriz"> Motriz</label>
+        <label class="radio-opt"><input type="radio" name="disability" value="Visual"> Visual</label>
+        <label class="radio-opt"><input type="radio" name="disability" value="Auditiva"> Auditiva</label>
+        <label class="radio-opt"><input type="radio" name="disability" value="Intelectual"> Intelectual</label>
+        <label class="radio-opt"><input type="radio" name="disability" value="Otra"> Otra</label>
+      </div>
+      <div class="field" style="margin-top:1rem">
+        <label>Detalle (opcional)</label>
+        <input type="text" id="f-disability-detail" placeholder="Describí si es necesario">
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+        Información Médica Adicional
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Donante de órganos</label>
+          <div class="radio-group" id="f-donor">
+            <label class="radio-opt"><input type="radio" name="donor" value="Sí"> Sí</label>
+            <label class="radio-opt"><input type="radio" name="donor" value="No" checked> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Posee marcapasos</label>
+          <div class="radio-group" id="f-pacemaker">
+            <label class="radio-opt"><input type="radio" name="pacemaker" value="Sí"> Sí</label>
+            <label class="radio-opt"><input type="radio" name="pacemaker" value="No" checked> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Requiere medicación urgente</label>
+          <div class="radio-group" id="f-urgent-med">
+            <label class="radio-opt"><input type="radio" name="urgent-med" value="Sí"> Sí</label>
+            <label class="radio-opt"><input type="radio" name="urgent-med" value="No" checked> No</label>
+          </div>
+        </div>
+        <div class="field col-span-2">
+          <label>Observaciones médicas importantes</label>
+          <textarea id="f-med-obs" placeholder="Información relevante para el personal médico..."></textarea>
+        </div>
+        <div class="field col-span-2">
+          <label>Instrucciones especiales</label>
+          <textarea id="f-special-inst" placeholder="Instrucciones especiales para emergencias..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns-form">
+      <button class="back-btn" onclick="prevStep(2)">← Anterior</button>
+      <button class="next-btn" onclick="nextStep(2)">Continuar → Alergias</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Alergias -->
+  <div class="form-step" id="step-3" style="display:none">
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+        Alergias
+      </div>
+      <p style="font-size:.9rem;color:var(--gray);margin-bottom:1.25rem;">¿Tenés alergias?</p>
+      <div class="radio-group" id="f-allergy-has" style="margin-bottom:1.25rem">
+        <label class="radio-opt"><input type="radio" name="allergy-has" value="no" checked> No</label>
+        <label class="radio-opt"><input type="radio" name="allergy-has" value="si"> Sí</label>
+      </div>
+      <div id="allergy-fields" style="display:none">
+        <div class="checks-grid" style="margin-bottom:1rem">
+          <label class="check-opt"><input type="checkbox" value="Medicamentos"> 💊 Medicamentos</label>
+          <label class="check-opt"><input type="checkbox" value="Insectos"> 🐝 Insectos</label>
+          <label class="check-opt"><input type="checkbox" value="Alimentos"> 🍎 Alimentos</label>
+          <label class="check-opt"><input type="checkbox" value="Látex"> 🧤 Látex</label>
+          <label class="check-opt"><input type="checkbox" value="Otras"> Otras</label>
+        </div>
+        <div class="field">
+          <label>Detalles de alergias</label>
+          <textarea id="f-allergy-detail" placeholder="Describí las alergias específicas (medicamentos, alimentos, etc.)..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns-form">
+      <button class="back-btn" onclick="prevStep(3)">← Anterior</button>
+      <button class="next-btn" onclick="nextStep(3)">Continuar → Medicación</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Medicación -->
+  <div class="form-step" id="step-4" style="display:none">
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M6.5 10h-2v5h2v-5zm6 0h-2v5h2v-5zm8.5 7H2v2h19v-2zm-2.5-7h-2v5h2v-5zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>
+        Medicación Actual
+      </div>
+      <p style="font-size:.9rem;color:var(--gray);margin-bottom:1.25rem;">¿Utilizás medicamentos actualmente?</p>
+      <div class="radio-group" id="f-med-has" style="margin-bottom:1.5rem">
+        <label class="radio-opt"><input type="radio" name="med-has" value="no" checked> No</label>
+        <label class="radio-opt"><input type="radio" name="med-has" value="si"> Sí</label>
+      </div>
+      <div id="med-fields" style="display:none">
+        <div id="med-rows"></div>
+        <button class="add-btn" onclick="addMedRow()">+ Agregar medicamento</button>
+        <div class="field" style="margin-top:1.5rem">
+          <label>Medicamentos de Emergencia</label>
+          <input type="text" id="f-emergency-med" placeholder="Ej: Adrenalina, Glucagón...">
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns-form">
+      <button class="back-btn" onclick="prevStep(4)">← Anterior</button>
+      <button class="next-btn" onclick="nextStep(4)">Continuar → Contactos</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Contactos emergencia -->
+  <div class="form-step" id="step-5" style="display:none">
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        Contacto Principal <span style="color:var(--bordo);font-size:.75rem;margin-left:4px">(requerido)</span>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nombre completo <span class="req">*</span></label>
+          <input type="text" id="f-ec1-name" placeholder="Ej: María García">
+          <span class="error-msg" id="err-ec1-name">Ingresá el nombre del contacto.</span>
+        </div>
+        <div class="field">
+          <label>Relación <span class="req">*</span></label>
+          <input type="text" id="f-ec1-rel" placeholder="Ej: Madre, Esposa, Hermano">
+          <span class="error-msg" id="err-ec1-rel">Ingresá la relación.</span>
+        </div>
+        <div class="field col-span-2">
+          <label>Teléfono <span class="req">*</span></label>
+          <input type="tel" id="f-ec1-phone" placeholder="Ej: +54 9 11 1234-5678">
+          <span class="error-msg" id="err-ec1-phone">Ingresá el teléfono.</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        Segundo Contacto <span style="color:var(--gray);font-size:.75rem;margin-left:4px">(opcional)</span>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nombre completo</label>
+          <input type="text" id="f-ec2-name" placeholder="Ej: Carlos García">
+        </div>
+        <div class="field">
+          <label>Relación</label>
+          <input type="text" id="f-ec2-rel" placeholder="Ej: Padre, Amigo">
+        </div>
+        <div class="field col-span-2">
+          <label>Teléfono</label>
+          <input type="tel" id="f-ec2-phone" placeholder="Ej: +54 9 11 9876-5432">
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns-form">
+      <button class="back-btn" onclick="prevStep(5)">← Anterior</button>
+      <button class="next-btn" onclick="nextStep(5)">Continuar → Confirmación</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Confirmar / Terms -->
+  <div class="form-step" id="step-6" style="display:none">
+    <div class="form-card" style="border-top-color:var(--bordo)">
+      <div class="form-card-title">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+        Términos y Condiciones
+      </div>
+      <div class="terms-box">
+        <h3>Compromisos BLINK</h3>
+        <ul>
+          <li>La información proporcionada será almacenada exclusivamente para su consulta en situaciones de emergencia.</li>
+          <li>Sos responsable de mantener tus datos actualizados para una atención óptima.</li>
+          <li>BLINK utilizará la información exclusivamente para identificación médica y asistencia en emergencias.</li>
+          <li>La plataforma no reemplaza la atención médica profesional.</li>
+          <li>Autorizás la visualización de la información del QR cuando sea necesario para proteger tu salud o integridad física.</li>
+        </ul>
+      </div>
+      <div class="heart-accept" id="terms-accept-area" onclick="toggleTerms()">
+        <button class="heart-btn" id="heart-btn" type="button">🤍</button>
+        <div class="heart-accept-text">
+          <strong id="terms-accept-text">Hacé clic en el corazón para aceptar los términos</strong>
+          <span>Al aceptar, confirmás que leíste y comprendés las condiciones de uso</span>
+        </div>
+      </div>
+      <span class="error-msg" id="err-terms" style="font-size:.85rem;margin-bottom:1rem;">Debés aceptar los términos para continuar.</span>
+      <button class="submit-btn" id="submit-btn" onclick="submitForm()" disabled>
+        ♥ &nbsp; Crear Perfil y Generar QR
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PATIENT LIST -->
+<div class="page" id="page-list">
+<div class="container">
+  <a class="back-link" onclick="showPage('home')">← Volver al inicio</a>
+  <div class="section-title">Pacientes Registrados</div>
+  <p class="section-sub">Buscá y accedé a los perfiles médicos.</p>
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Buscar por nombre, ID o tipo de sangre..." oninput="renderList()">
+  </div>
+  <div class="patient-grid" id="patient-grid"></div>
+</div>
+</div>
+
+<!-- PROFILE -->
+<div class="page" id="page-profile">
+<div class="container">
+  <a class="back-link" id="profile-back" onclick="showPage('list')">← Volver a pacientes</a>
+  <div id="profile-content"></div>
+</div>
+</div>
+
+<!-- SCANNER -->
+<div class="page" id="page-scan">
+<div class="container">
+  <a class="back-link" onclick="showPage('home')">← Volver al inicio</a>
+  <div class="section-title">Escanear Código QR</div>
+  <p class="section-sub">Escaneá el código QR de una pulsera BLINK para acceder a la información médica.</p>
+  <div class="scanner-area">
+    <svg style="width:80px;height:80px;fill:#dde3ef;margin:0 auto 1.5rem;display:block;" viewBox="0 0 24 24"><path d="M9.5 6.5v3h-3v-3h3M11 5H5v6h6V5zm-1.5 9.5v3h-3v-3h3M11 13H5v6h6v-6zm6.5-6.5v3h-3v-3h3M20 5h-6v6h6V5zm-6 8h1.5v1.5H14V13zm1.5 1.5H17V16h-1.5v-1.5zM17 13h1.5v1.5H17V13zm-3 3h1.5v1.5H14V16zm1.5 1.5H17V19h-1.5v-1.5zM17 16h1.5v1.5H17V16zm1.5-1.5H20V16h-1.5v-1.5zm0 3H20V19h-1.5v-1.5zM22 7h-2V4h-3V2h5v5zm0 15v-5h-2v3h-3v2h5zM2 22h5v-2H4v-3H2v5zM2 2v5h2V4h3V2H2z"/></svg>
+    <p style="color:var(--gray);font-size:.9rem;margin-bottom:1.5rem;">Usá la cámara o ingresá el ID del paciente manualmente</p>
+    <video id="scanner-video" autoplay playsinline></video>
+    <div>
+      <button class="scan-btn" id="scan-start-btn" onclick="startScan()">📷 Activar Cámara</button>
+      <button class="scan-btn stop" id="scan-stop-btn" onclick="stopScan()" style="display:none">✕ Detener</button>
+    </div>
+    <div class="scan-manual">
+      <p style="font-size:.85rem;color:var(--gray);margin-bottom:1rem;">O buscá manualmente por ID</p>
+      <input type="text" id="manual-id" placeholder="Ej: BLK-2026-000001">
+      <button class="scan-btn" onclick="manualSearch()">Buscar</button>
+    </div>
+    <div class="scan-result-msg" id="scan-msg"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+let currentStep = 1;
+let termsAccepted = false;
+let editingId = null;
+let scanStream = null;
+
+// ---- STORAGE ----
+function getPatients() { try { return JSON.parse(localStorage.getItem('blink_patients') || '[]'); } catch(e){ return []; } }
+function savePatients(p) { localStorage.setItem('blink_patients', JSON.stringify(p)); }
+
+// ---- INIT ----
+window.onload = () => {
+  const day = document.getElementById('f-day');
+  for(let i=1;i<=31;i++){ const o=document.createElement('option'); o.value=i<10?'0'+i:''+i; o.textContent=i<10?'0'+i:''+i; day.appendChild(o); }
+  const yr = document.getElementById('f-year');
+  const now = new Date().getFullYear();
+  for(let y=now;y>=1920;y--){ const o=document.createElement('option'); o.value=y; o.textContent=y; yr.appendChild(o); }
+  ['f-day','f-month','f-year'].forEach(id=>document.getElementById(id).addEventListener('change',calcAge));
+  setupRadioGroups();
+  setupCollapsibles();
+  updateHeroStats();
+};
+
+function setupRadioGroups() {
+  document.querySelectorAll('.radio-group').forEach(grp => {
+    grp.querySelectorAll('.radio-opt').forEach(opt => {
+      opt.addEventListener('click', (e) => {
+        e.preventDefault();
+        grp.querySelectorAll('.radio-opt').forEach(o=>o.classList.remove('selected'));
+        opt.classList.add('selected');
+        const radio = opt.querySelector('input[type=radio]');
+        if(radio) radio.checked = true;
+        const name = radio?.name;
+        if(name === 'allergy-has') document.getElementById('allergy-fields').style.display = radio.value==='si'?'block':'none';
+        if(name === 'med-has') document.getElementById('med-fields').style.display = radio.value==='si'?'block':'none';
+        if(name === 'history-has') document.getElementById('history-fields').style.display = radio.value==='si'?'block':'none';
+        if(name === 'blood') {
+          document.getElementById('blood-other').style.display = radio.value==='otro'?'block':'none';
+        }
+      });
+    });
+  });
+  document.querySelectorAll('.check-opt').forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      e.preventDefault();
+      opt.classList.toggle('selected');
+      const checkbox = opt.querySelector('input[type=checkbox]');
+      if(checkbox) checkbox.checked = opt.classList.contains('selected');
+    });
+  });
+}
+
+function setupCollapsibles() {
+  document.querySelectorAll('.collapse-trigger').forEach(t => {
+    t.addEventListener('click', () => {
+      t.classList.toggle('open');
+      const body = t.nextElementSibling;
+      if(body) body.classList.toggle('open');
+    });
+  });
+}
+
+// ---- PAGE NAV ----
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='list') renderList();
+  if(id==='form') { resetForm(); }
+  if(id==='home') updateHeroStats();
+}
+
+function updateHeroStats() {
+  const p = getPatients();
+  document.getElementById('stat-patients').textContent = p.length;
+}
+
+// ---- FORM STEPS ----
+function nextStep(current) {
+  if(!validateStep(current)) return;
+  document.getElementById('step-'+current).style.display='none';
+  currentStep = current + 1;
+  document.getElementById('step-'+currentStep).style.display='block';
+  updateStepUI();
+  window.scrollTo(0,200);
+}
+function prevStep(current) {
+  document.getElementById('step-'+current).style.display='none';
+  currentStep = current - 1;
+  document.getElementById('step-'+currentStep).style.display='block';
+  updateStepUI();
+  window.scrollTo(0,200);
+}
+function updateStepUI() {
+  document.querySelectorAll('#form-steps .step').forEach(s => {
+    const n = parseInt(s.dataset.step);
+    s.classList.remove('active','done');
+    if(n===currentStep) s.classList.add('active');
+    if(n<currentStep) s.classList.add('done');
+  });
+  document.getElementById('form-progress').style.width = (currentStep/6*100)+'%';
+}
+
+function validateStep(step) {
+  let ok = true;
+  const show = (id, show) => {
+    const el = document.getElementById(id);
+    if(el) el.classList[show?'add':'remove']('show');
+  };
+  const markField = (id, bad) => {
+    const el = document.getElementById(id);
+    if(el) el.classList[bad?'add':'remove']('error');
+  };
+
+  if(step===1) {
+    const name = document.getElementById('f-name').value.trim();
+    const doc = document.getElementById('f-doc').value.trim();
+    const city = document.getElementById('f-city').value.trim();
+    const sex = document.querySelector('input[name="sex"]:checked');
+    const birth = document.getElementById('f-age').value;
+
+    if(!name || name.length < 3) { show('err-name',true); markField('f-name',true); ok=false; } else { show('err-name',false); markField('f-name',false); }
+    if(!sex) { show('err-sex',true); ok=false; } else { show('err-sex',false); }
+    if(!doc || doc.length < 5) { show('err-doc',true); markField('f-doc',true); ok=false; } else { show('err-doc',false); markField('f-doc',false); }
+    if(!city) { show('err-city',true); markField('f-city',true); ok=false; } else { show('err-city',false); markField('f-city',false); }
+    if(!birth) { show('err-birth',true); ok=false; } else { show('err-birth',false); }
+  }
+  if(step===2) {
+    const blood = document.querySelector('input[name="blood"]:checked');
+    if(!blood) { show('err-blood',true); ok=false; } else { show('err-blood',false); }
+  }
+  if(step===5) {
+    const n = document.getElementById('f-ec1-name').value.trim();
+    const r = document.getElementById('f-ec1-rel').value.trim();
+    const p = document.getElementById('f-ec1-phone').value.trim();
+    if(!n) { show('err-ec1-name',true); markField('f-ec1-name',true); ok=false; } else { show('err-ec1-name',false); markField('f-ec1-name',false); }
+    if(!r) { show('err-ec1-rel',true); markField('f-ec1-rel',true); ok=false; } else { show('err-ec1-rel',false); markField('f-ec1-rel',false); }
+    if(!p) { show('err-ec1-phone',true); markField('f-ec1-phone',true); ok=false; } else { show('err-ec1-phone',false); markField('f-ec1-phone',false); }
+  }
+  if(!ok) { showToast('Por favor completá los campos requeridos.','error'); }
+  return ok;
+}
+
+// ---- AGE CALC ----
+function calcAge() {
+  const d = document.getElementById('f-day').value;
+  const m = document.getElementById('f-month').value;
+  const y = document.getElementById('f-year').value;
+  if(!d||!m||!y) return;
+  const birth = new Date(y, m-1, d);
+  const now = new Date();
+  let age = now.getFullYear()-birth.getFullYear();
+  if(now<new Date(now.getFullYear(),birth.getMonth(),birth.getDate())) age--;
+  if(age<0||age>130) { document.getElementById('f-age').value='Fecha inválida'; return; }
+  document.getElementById('f-age').value = age + ' años';
+}
+
+// ---- MEDS ----
+let medCount = 0;
+function addMedRow() {
+  medCount++;
+  const id = 'med-'+medCount;
+  const row = document.createElement('div');
+  row.className='med-row'; row.id=id;
+  row.innerHTML=`
+    <div class="med-row-fields">
+      <div class="field"><label>Medicamento</label><input type="text" placeholder="Nombre"></div>
+      <div class="field"><label>Dosis</label><input type="text" placeholder="Ej: 500mg"></div>
+      <div class="field"><label>Frecuencia</label><input type="text" placeholder="Ej: Diario"></div>
+      <div class="field"><label>Horario</label><input type="text" placeholder="Ej: 8am, 8pm"></div>
+    </div>
+    <div class="med-row-footer">
+      <button class="remove-btn" onclick="document.getElementById('${id}').remove()" style="color:var(--bordo);font-size:.82rem;display:flex;align-items:center;gap:4px;border:1px solid rgba(123,31,58,0.3);border-radius:50px;padding:4px 12px;">✕ Quitar</button>
+    </div>
+  `;
+  document.getElementById('med-rows').appendChild(row);
+}
+
+// ---- TERMS ----
+function toggleTerms() {
+  termsAccepted = !termsAccepted;
+  document.getElementById('heart-btn').textContent = termsAccepted ? '❤️' : '🤍';
+  document.getElementById('heart-btn').classList.toggle('accepted', termsAccepted);
+  document.getElementById('terms-accept-text').textContent = termsAccepted ? '✓ Términos aceptados — ¡Gracias!' : 'Hacé clic en el corazón para aceptar los términos';
+  document.getElementById('terms-accept-area').style.borderColor = termsAccepted ? 'var(--bordo)' : '#dde3ef';
+  document.getElementById('terms-accept-area').style.background = termsAccepted ? '#fff0f3' : 'white';
+  document.getElementById('submit-btn').disabled = !termsAccepted;
+  document.getElementById('err-terms').classList.remove('show');
+}
+
+// ---- SUBMIT ----
+function collectFormData() {
+  const sel = (sel) => { const r=document.querySelector(sel); return r?r.value:''; };
+  const inp = (id) => { const e=document.getElementById(id); return e?e.value.trim():''; };
+  const checks = (container) => Array.from(document.querySelectorAll(container+' .check-opt.selected input')).map(i=>i.value);
+  const meds = [];
+  document.querySelectorAll('#med-rows .med-row').forEach(r => {
+    const inputs = r.querySelectorAll('input');
+    if(inputs[0].value.trim()) meds.push({ name:inputs[0].value, dose:inputs[1].value, freq:inputs[2].value, time:inputs[3].value });
+  });
+  const bloodVal = sel('input[name="blood"]:checked') || '';
+  return {
+    name: inp('f-name'), sex: sel('input[name="sex"]:checked'), doc: inp('f-doc'),
+    city: inp('f-city'), phone: inp('f-phone'),
+    day: document.getElementById('f-day').value,
+    month: document.getElementById('f-month').value,
+    year: document.getElementById('f-year').value,
+    age: inp('f-age'),
+    height: inp('f-height'), weight: inp('f-weight'),
+    blood: bloodVal==='otro'?inp('f-blood-other'):bloodVal,
+    historyHas: sel('input[name="history-has"]:checked'),
+    history: checks('#history-fields .checks-grid'),
+    historyObs: inp('f-history-obs'),
+    disability: sel('input[name="disability"]:checked'),
+    disabilityDetail: inp('f-disability-detail'),
+    donor: sel('input[name="donor"]:checked'),
+    pacemaker: sel('input[name="pacemaker"]:checked'),
+    urgentMed: sel('input[name="urgent-med"]:checked'),
+    medObs: inp('f-med-obs'), specialInst: inp('f-special-inst'),
+    allergyHas: sel('input[name="allergy-has"]:checked'),
+    allergies: checks('#allergy-fields .checks-grid'),
+    allergyDetail: inp('f-allergy-detail'),
+    medHas: sel('input[name="med-has"]:checked'),
+    medications: meds, emergencyMed: inp('f-emergency-med'),
+    ec1Name: inp('f-ec1-name'), ec1Rel: inp('f-ec1-rel'), ec1Phone: inp('f-ec1-phone'),
+    ec2Name: inp('f-ec2-name'), ec2Rel: inp('f-ec2-rel'), ec2Phone: inp('f-ec2-phone'),
+  };
+}
+
+function generateId() {
+  const year = new Date().getFullYear();
+  const patients = getPatients();
+  const maxNum = patients.reduce((max,p) => { const n=parseInt(p.id.split('-')[2]||0); return n>max?n:max; }, 0);
+  return `BLK-${year}-${String(maxNum+1).padStart(6,'0')}`;
+}
+
+function submitForm() {
+  if(!termsAccepted) { document.getElementById('err-terms').classList.add('show'); return; }
+  const data = collectFormData();
+  const patients = getPatients();
+  const id = editingId || generateId();
+  const now = new Date().toISOString();
+  const patient = { id, ...data, createdAt: editingId?(patients.find(p=>p.id===id)?.createdAt||now):now, updatedAt: now };
+  if(editingId) {
+    const idx = patients.findIndex(p=>p.id===editingId);
+    if(idx>=0) patients[idx]=patient; else patients.push(patient);
+  } else {
+    patients.push(patient);
+  }
+  savePatients(patients);
+  showToast('¡Perfil creado exitosamente! Generando QR...','success');
+  setTimeout(()=>{ showProfile(id, 'form'); }, 800);
+}
+
+// ---- RESET FORM ----
+function resetForm() {
+  currentStep = 1;
+  editingId = null;
+  termsAccepted = false;
+  document.querySelectorAll('.form-step').forEach((s,i)=>s.style.display=i===0?'block':'none');
+  document.querySelectorAll('input:not([type=radio]):not([type=checkbox])').forEach(i=>{ if(!i.readOnly) i.value=''; });
+  document.querySelectorAll('textarea').forEach(t=>t.value='');
+  // Reset selects (day, month, year)
+  document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+  document.getElementById('f-age').value='';
+  document.querySelectorAll('.radio-opt').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.check-opt').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('.error').forEach(e=>e.classList.remove('error'));
+  document.getElementById('allergy-fields').style.display='none';
+  document.getElementById('med-fields').style.display='none';
+  document.getElementById('history-fields').style.display='none';
+  document.getElementById('blood-other').style.display='none';
+  document.getElementById('med-rows').innerHTML='';
+  document.getElementById('heart-btn').textContent='🤍';
+  document.getElementById('terms-accept-text').textContent='Hacé clic en el corazón para aceptar los términos';
+  document.getElementById('terms-accept-area').style.borderColor='#dde3ef';
+  document.getElementById('terms-accept-area').style.background='white';
+  document.getElementById('submit-btn').disabled=true;
+  updateStepUI();
+}
+
+// ---- LIST ----
+function renderList() {
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const patients = getPatients();
+  const grid = document.getElementById('patient-grid');
+  if(!grid) return;
+  const filtered = patients.filter(p =>
+    p.name?.toLowerCase().includes(q) ||
+    p.id?.toLowerCase().includes(q) ||
+    p.blood?.toLowerCase().includes(q)
+  );
+  if(!filtered.length) {
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1-5h2v2h-2zm0 4h2v6h-2z"/></svg><p>${patients.length===0?'No hay pacientes registrados aún':'Sin resultados para tu búsqueda'}</p><span style="font-size:.85rem">${patients.length===0?'Registrá el primero haciendo clic en "+ Registrar"':'Probá con otro nombre o ID'}</span></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(p=>`
+    <div class="patient-card" onclick="showProfile('${p.id}','list')">
+      <div class="patient-card-id">${p.id}</div>
+      <div class="patient-card-name">${p.name||'Sin nombre'}</div>
+      <div class="patient-card-info">${p.age||''} · ${p.city||''}</div>
+      ${p.blood?`<span class="blood-badge">♥ ${p.blood}</span>`:''}
+      <div style="margin-top:12px;font-size:.75rem;color:var(--gray)">Registrado ${new Date(p.createdAt).toLocaleDateString('es-AR')}</div>
+    </div>
+  `).join('');
+}
+
+// ---- PROFILE ----
+function showProfile(id, from) {
+  const patients = getPatients();
+  const p = patients.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('profile-back').onclick = ()=>showPage(from||'list');
+  const content = document.getElementById('profile-content');
+  const allergiesStr = p.allergyHas==='si'
+    ? [...(p.allergies||[]), p.allergyDetail?`Detalle: ${p.allergyDetail}`:null].filter(Boolean).join(', ')
+    : 'Sin alergias conocidas';
+  const historyStr = p.historyHas==='si'
+    ? [...(p.history||[]), p.historyObs?`Obs: ${p.historyObs}`:null].filter(Boolean).join(', ')
+    : 'Sin antecedentes';
+  const medsStr = p.medHas==='si' && p.medications?.length
+    ? p.medications.map(m=>`${m.name} ${m.dose}`).join(', ')
+    : 'Ninguno';
+
+  content.innerHTML = `
+    <div class="profile-header">
+      <div>
+        <div class="profile-id">${p.id} &nbsp;·&nbsp; Actualizado ${new Date(p.updatedAt).toLocaleDateString('es-AR')}</div>
+        <div class="profile-name">${p.name}</div>
+        <div class="profile-badges">
+          ${p.blood?`<span class="badge badge-blood">♥ ${p.blood}</span>`:''}
+          ${p.age?`<span class="badge badge-age">${p.age}</span>`:''}
+          ${p.donor==='Sí'?`<span class="badge badge-donor">Donante de órganos</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button onclick="editPatient('${id}')" style="padding:10px 20px;background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:50px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;">✏️ Editar</button>
+        <button onclick="deletePatient('${id}')" style="padding:10px 20px;background:rgba(168,50,86,0.4);color:white;border:1px solid rgba(168,50,86,0.5);border-radius:50px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;">🗑 Eliminar</button>
+      </div>
+    </div>
+
+    <div class="emergency-card">
+      <div class="emergency-title">⚡ Datos críticos de emergencia</div>
+      <div class="emergency-grid">
+        <div class="em-item"><label>Paciente</label><span class="big">${p.name}</span></div>
+        <div class="em-item"><label>Sangre</label><span class="big">${p.blood||'Desconocido'}</span></div>
+        <div class="em-item"><label>Edad</label><span>${p.age||'N/D'}</span></div>
+        <div class="em-item"><label>Alergias</label><span>${allergiesStr}</span></div>
+        <div class="em-item"><label>Condiciones</label><span>${historyStr}</span></div>
+        <div class="em-item"><label>Med. de emergencia</label><span>${p.emergencyMed||'Ninguno'}</span></div>
+        <div class="em-item"><label>Contacto principal</label><span>${p.ec1Name||'N/D'} (${p.ec1Rel||''})</span></div>
+        <div class="em-item"><label>Teléfono</label><span>${p.ec1Phone||'N/D'}</span></div>
+      </div>
+      ${p.pacemaker==='Sí'?'<div style="margin-top:1rem;padding:10px;background:rgba(255,255,255,0.15);border-radius:8px;font-size:.85rem;">⚠️ POSEE MARCAPASOS</div>':''}
+    </div>
+
+    <div class="qr-section">
+      <h3>Código QR Médico</h3>
+      <p>Escaneá para acceder a esta ficha en emergencias</p>
+      <div id="qr-container"></div>
+      <button class="qr-print-btn" onclick="window.print()">🖨 Imprimir QR</button>
+      <button class="qr-print-btn" onclick="copyProfileLink('${id}')">📋 Copiar enlace</button>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-title"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Información Personal</div>
+      <div class="info-row"><label>Nombre</label><span>${p.name}</span></div>
+      <div class="info-row"><label>Sexo</label><span>${p.sex||'N/D'}</span></div>
+      <div class="info-row"><label>Documento</label><span>${p.doc||'N/D'}</span></div>
+      <div class="info-row"><label>Fecha de nacimiento</label><span>${p.day?`${p.day}/${p.month}/${p.year}`:''}</span></div>
+      <div class="info-row"><label>Edad</label><span>${p.age||'N/D'}</span></div>
+      <div class="info-row"><label>Ciudad</label><span>${p.city||'N/D'}</span></div>
+      <div class="info-row"><label>Teléfono</label><span>${p.phone||'N/D'}</span></div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-card-title"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>Información Médica</div>
+      <div class="info-row"><label>Tipo de sangre</label><span>${p.blood||'N/D'}</span></div>
+      <div class="info-row"><label>Altura</label><span>${p.height?p.height+' cm':'N/D'}</span></div>
+      <div class="info-row"><label>Peso</label><span>${p.weight?p.weight+' kg':'N/D'}</span></div>
+      <div class="info-row"><label>Antecedentes</label><span>${historyStr}</span></div>
+      <div class="info-row"><label>Discapacidad</label><span>${p.disability||'Ninguna'}${p.disabilityDetail?' — '+p.disabilityDetail:''}</span></div>
+      <div class="info-row"><label>Donante de órganos</label><span>${p.donor||'No'}</span></div>
+      <div class="info-row"><label>Marcapasos</label><span>${p.pacemaker||'No'}</span></div>
+      <div class="info-row"><label>Requiere med. urgente</label><span>${p.urgentMed||'No'}</span></div>
+      ${p.medObs?`<div class="info-row"><label>Observaciones</label><span>${p.medObs}</span></div>`:''}
+      ${p.specialInst?`<div class="info-row"><label>Instrucciones especiales</label><span>${p.specialInst}</span></div>`:''}
+    </div>
+
+    ${p.allergyHas==='si'?`<div class="info-card">
+      <div class="info-card-title"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>Alergias</div>
+      ${(p.allergies||[]).map(a=>`<div class="info-row"><label>Alergia</label><span class="tag danger">${a}</span></div>`).join('')}
+      ${p.allergyDetail?`<div class="info-row"><label>Detalle</label><span>${p.allergyDetail}</span></div>`:''}
+    </div>`:''}
+
+    ${p.medHas==='si'?`<div class="info-card">
+      <div class="info-card-title"><svg viewBox="0 0 24 24"><path d="M6.5 10h-2v5h2v-5zm6 0h-2v5h2v-5zm8.5 7H2v2h19v-2zm-2.5-7h-2v5h2v-5zM11.5 1L2 6v2h19V6l-9.5-5z"/></svg>Medicación</div>
+      ${(p.medications||[]).map(m=>`
+        <div class="info-row"><label>${m.name}</label><span>${m.dose||''} · ${m.freq||''} · ${m.time||''}</span></div>
+      `).join('')}
+      ${p.emergencyMed?`<div class="info-row"><label>Med. de emergencia</label><span class="tag warning">${p.emergencyMed}</span></div>`:''}
+    </div>`:''}
+
+    <div class="info-card">
+      <div class="info-card-title"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.25 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Contactos de Emergencia</div>
+      <div class="info-row"><label>Contacto principal</label><span>${p.ec1Name||'N/D'}</span></div>
+      <div class="info-row"><label>Relación</label><span>${p.ec1Rel||'N/D'}</span></div>
+      <div class="info-row"><label>Teléfono</label><span>${p.ec1Phone||'N/D'}</span></div>
+      ${p.ec2Name?`
+      <div class="info-row" style="margin-top:8px;padding-top:8px;border-top:2px solid var(--cream-dark)"><label>2do contacto</label><span>${p.ec2Name}</span></div>
+      <div class="info-row"><label>Relación</label><span>${p.ec2Rel||'N/D'}</span></div>
+      <div class="info-row"><label>Teléfono</label><span>${p.ec2Phone||'N/D'}</span></div>
+      `:''}
+    </div>
+  `;
+  showPage('profile');
+  setTimeout(()=>generateQR(id), 200);
+}
+
+// ---- QR GENERATION ----
+function generateQR(id) {
+  const container = document.getElementById('qr-container');
+  if(!container) return;
+  container.innerHTML='';
+  const profileUrl = window.location.href.split('?')[0] + '?patient='+id;
+  try {
+    new QRCode(container, {
+      text: profileUrl,
+      width: 200,
+      height: 200,
+      colorDark: '#0d1b3e',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    // Apply heart-shaped clip
+    setTimeout(()=>{
+      const canvas = container.querySelector('canvas');
+      if(!canvas) return;
+      const hc = document.createElement('canvas');
+      hc.width = 220; hc.height = 220;
+      const ctx = hc.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,220,220);
+      drawHeartClip(ctx, 110, 110, 100);
+      ctx.drawImage(canvas, 10, 20, 200, 200);
+      ctx.globalCompositeOperation = 'destination-in';
+      drawHeartFill(ctx, 110, 110, 100);
+      ctx.globalCompositeOperation = 'source-over';
+      container.innerHTML='';
+      hc.style.borderRadius='8px';
+      hc.style.border='3px solid #7b1f3a';
+      hc.style.boxShadow='0 4px 20px rgba(123,31,58,0.2)';
+      container.appendChild(hc);
+    }, 100);
+  } catch(e) { container.innerHTML='<p style="color:var(--gray)">QR generado (ID: '+id+')</p>'; }
+}
+
+function drawHeartClip(ctx, cx, cy, r) {
+  ctx.beginPath();
+  const s = r/40;
+  for(let i=0;i<=360;i+=1) {
+    const t = i*Math.PI/180;
+    const x = cx + s*(16*Math.pow(Math.sin(t),3));
+    const y = cy - s*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.strokeStyle='#7b1f3a'; ctx.lineWidth=3; ctx.stroke();
+}
+
+function drawHeartFill(ctx, cx, cy, r) {
+  ctx.beginPath();
+  const s = r/40;
+  for(let i=0;i<=360;i+=1) {
+    const t = i*Math.PI/180;
+    const x = cx + s*(16*Math.pow(Math.sin(t),3));
+    const y = cy - s*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath(); ctx.fill();
+}
+
+// ---- EDIT / DELETE ----
+function editPatient(id) {
+  const p = getPatients().find(x=>x.id===id);
+  if(!p) return;
+  editingId = id;
+  showPage('form');
+  setTimeout(()=>{ populateForm(p); }, 100);
+}
+
+function populateForm(p) {
+  const set = (id, val) => { const e=document.getElementById(id); if(e) e.value=val||''; };
+  set('f-name',p.name); set('f-doc',p.doc); set('f-city',p.city); set('f-phone',p.phone);
+  set('f-day',p.day); set('f-month',p.month); set('f-year',p.year); set('f-age',p.age);
+  set('f-height',p.height); set('f-weight',p.weight);
+  set('f-history-obs',p.historyObs); set('f-disability-detail',p.disabilityDetail);
+  set('f-med-obs',p.medObs); set('f-special-inst',p.specialInst);
+  set('f-allergy-detail',p.allergyDetail);
+  set('f-emergency-med',p.emergencyMed);
+  set('f-ec1-name',p.ec1Name); set('f-ec1-rel',p.ec1Rel); set('f-ec1-phone',p.ec1Phone);
+  set('f-ec2-name',p.ec2Name); set('f-ec2-rel',p.ec2Rel); set('f-ec2-phone',p.ec2Phone);
+  selectRadio('sex', p.sex); selectRadio('blood', p.blood);
+  selectRadio('history-has', p.historyHas||'no'); selectRadio('disability', p.disability);
+  selectRadio('donor', p.donor); selectRadio('pacemaker', p.pacemaker); selectRadio('urgent-med', p.urgentMed);
+  selectRadio('allergy-has', p.allergyHas||'no'); selectRadio('med-has', p.medHas||'no');
+  if(p.historyHas==='si') document.getElementById('history-fields').style.display='block';
+  if(p.allergyHas==='si') document.getElementById('allergy-fields').style.display='block';
+  if(p.medHas==='si') { document.getElementById('med-fields').style.display='block'; (p.medications||[]).forEach(m=>{ addMedRow(); const row=document.querySelector('#med-rows .med-row:last-child'); if(row){ const ins=row.querySelectorAll('input'); ins[0].value=m.name||''; ins[1].value=m.dose||''; ins[2].value=m.freq||''; ins[3].value=m.time||''; } }); }
+  (p.history||[]).forEach(h=>{ document.querySelectorAll('#history-fields .check-opt').forEach(o=>{ if(o.querySelector('input').value===h) o.classList.add('selected'); }); });
+  (p.allergies||[]).forEach(a=>{ document.querySelectorAll('#allergy-fields .check-opt').forEach(o=>{ if(o.querySelector('input').value===a) o.classList.add('selected'); }); });
+}
+
+function selectRadio(name, value) {
+  if(!value) return;
+  const radio = document.querySelector(`input[name="${name}"][value="${value}"]`);
+  if(radio) { radio.checked=true; radio.closest('.radio-opt')?.classList.add('selected'); }
+}
+
+let _pendingDeleteId = null;
+function deletePatient(id) {
+  _pendingDeleteId = id;
+  document.getElementById('confirm-modal').classList.add('show');
+}
+function closeConfirmModal() {
+  _pendingDeleteId = null;
+  document.getElementById('confirm-modal').classList.remove('show');
+}
+function confirmDelete() {
+  if(!_pendingDeleteId) return;
+  const patients = getPatients().filter(p=>p.id!==_pendingDeleteId);
+  savePatients(patients);
+  closeConfirmModal();
+  showToast('Perfil eliminado.','success');
+  showPage('list');
+}
+
+function copyProfileLink(id) {
+  const url = window.location.href.split('?')[0]+'?patient='+id;
+  navigator.clipboard?.writeText(url).then(()=>showToast('Enlace copiado al portapapeles','success')).catch(()=>showToast('No se pudo copiar: '+url,'error'));
+}
+
+// ---- SCANNER ----
+function startScan() {
+  navigator.mediaDevices?.getUserMedia({video:{facingMode:'environment'}}).then(stream=>{
+    scanStream=stream;
+    const video = document.getElementById('scanner-video');
+    video.srcObject=stream; video.style.display='block';
+    document.getElementById('scan-start-btn').style.display='none';
+    document.getElementById('scan-stop-btn').style.display='inline-flex';
+    scanQR(video);
+  }).catch(()=>{ showToast('No se pudo acceder a la cámara. Usá la búsqueda manual.','error'); });
+}
+function stopScan() {
+  if(scanStream) { scanStream.getTracks().forEach(t=>t.stop()); scanStream=null; }
+  document.getElementById('scanner-video').style.display='none';
+  document.getElementById('scan-start-btn').style.display='inline-flex';
+  document.getElementById('scan-stop-btn').style.display='none';
+}
+function scanQR(video) {
+  if(!scanStream) return;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const check = () => {
+    if(!scanStream) return;
+    if(video.readyState===video.HAVE_ENOUGH_DATA) {
+      canvas.height=video.videoHeight; canvas.width=video.videoWidth;
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    }
+    requestAnimationFrame(check);
+  };
+  check();
+}
+function manualSearch() {
+  const val = document.getElementById('manual-id').value.trim().toUpperCase();
+  const msg = document.getElementById('scan-msg');
+  if(!val) { msg.className='scan-result-msg error'; msg.textContent='Ingresá un ID válido (Ej: BLK-2026-000001)'; return; }
+  const p = getPatients().find(x=>x.id===val||x.id.includes(val));
+  if(p) { msg.className='scan-result-msg success'; msg.textContent='Paciente encontrado: '+p.name; setTimeout(()=>{ stopScan(); showProfile(p.id,'scan'); },800); }
+  else { msg.className='scan-result-msg error'; msg.textContent='No se encontró ningún paciente con ese ID.'; }
+}
+
+// ---- TOAST ----
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+(type||'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ---- URL PARAMS ----
+const urlParams = new URLSearchParams(window.location.search);
+const patientParam = urlParams.get('patient');
+if(patientParam) {
+  window.addEventListener('load',()=>{ setTimeout(()=>showProfile(patientParam,'home'),200); });
+}
+</script>
+</body>
+</html>
